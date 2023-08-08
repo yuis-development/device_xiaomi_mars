@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-COMMON_PATH := device/xiaomi/sm8350-common
+DEVICE_PATH := device/xiaomi/mars
 
 BUILD_BROKEN_DUP_RULES := true
 BUILD_BROKEN_ELF_PREBUILT_PRODUCT_COPY_FILES := true
@@ -48,6 +48,10 @@ BOARD_SUPPORTS_SOUND_TRIGGER := true
 
 # Bootloader
 TARGET_NO_BOOTLOADER := true
+TARGET_BOOTLOADER_BOARD_NAME := mars
+
+# Display
+TARGET_SCREEN_DENSITY := 560
 
 # Dolby Vision
 SOONG_CONFIG_NAMESPACES += dolby_vision
@@ -55,25 +59,28 @@ SOONG_CONFIG_dolby_vision += enabled
 SOONG_CONFIG_dolby_vision_enabled := true
 
 # Filesystem
-TARGET_FS_CONFIG_GEN := $(COMMON_PATH)/config.fs
+TARGET_FS_CONFIG_GEN := $(DEVICE_PATH)/config.fs
 
 # GPS
 BOARD_VENDOR_QCOM_GPS_LOC_API_HARDWARE := default
 LOC_HIDL_VERSION := 4.0
 
 # HIDL
-DEVICE_MATRIX_FILE := $(COMMON_PATH)/hidl/compatibility_matrix.xml
+DEVICE_MATRIX_FILE := $(DEVICE_PATH)/hidl/compatibility_matrix.xml
 
 DEVICE_FRAMEWORK_COMPATIBILITY_MATRIX_FILE := \
-    $(COMMON_PATH)/hidl/vendor_framework_compatibility_matrix.xml \
-    $(COMMON_PATH)/hidl/xiaomi_framework_compatibility_matrix.xml \
+    $(DEVICE_PATH)/hidl/vendor_framework_compatibility_matrix.xml \
+    $(DEVICE_PATH)/hidl/xiaomi_framework_compatibility_matrix.xml \
     vendor/aosp/config/device_framework_matrix.xml
 
 DEVICE_MANIFEST_FILE := \
-    $(COMMON_PATH)/hidl/manifest_lahaina.xml \
-    $(COMMON_PATH)/hidl/manifest_xiaomi.xml
+    $(DEVICE_PATH)/hidl/manifest_lahaina.xml \
+    $(DEVICE_PATH)/hidl/manifest_xiaomi.xml
 
 # Kernel
+TARGET_KERNEL_SOURCE := kernel/xiaomi/mars
+TARGET_KERNEL_CONFIG := vendor/mars_defconfig
+
 BOARD_KERNEL_BASE := 0x00000000
 BOARD_KERNEL_IMAGE_NAME := Image
 BOARD_KERNEL_PAGESIZE := 4096
@@ -99,19 +106,33 @@ BOARD_KERNEL_CMDLINE += pcie_ports=compat
 BOARD_KERNEL_CMDLINE += iptable_raw.raw_before_defrag=1
 BOARD_KERNEL_CMDLINE += ip6table_raw.raw_before_defrag=1
 
+# Kernel modules
+BOOT_KERNEL_MODULES := \
+    fts_touch_spi.ko \
+    hwid.ko \
+    xiaomi_touch.ko
+
+BOARD_VENDOR_KERNEL_MODULES_LOAD := $(strip $(shell cat $(DEVICE_PATH)/modules.load))
+BOARD_VENDOR_RAMDISK_RECOVERY_KERNEL_MODULES_LOAD := $(BOOT_KERNEL_MODULES)
+
 # LiveDisplay
 ifneq ("$(wildcard hardware/lineage/livedisplay)", "")
 SOONG_CONFIG_NAMESPACES += livedisplay
 SOONG_CONFIG_livedisplay += enabled
 SOONG_CONFIG_livedisplay_enabled := true
 DEVICE_MANIFEST_FILE += \
-    $(COMMON_PATH)/hidl/manifest_lineage.xml
+    $(DEVICE_PATH)/hidl/manifest_lineage.xml
 endif
 
 # NFC
 TARGET_USES_NQ_NFC := true
 
+# OTA assert
+TARGET_OTA_ASSERT_DEVICE := mars,star
+
 # Partitions
+BOARD_DTBOIMG_PARTITION_SIZE := 25165824
+BOARD_USERDATAIMAGE_PARTITION_SIZE := 114001162240
 BOARD_FLASH_BLOCK_SIZE := 131072
 BOARD_BOOTIMAGE_PARTITION_SIZE := 201326592
 BOARD_SUPER_PARTITION_SIZE := 9126805504
@@ -155,10 +176,10 @@ TARGET_BOARD_PLATFORM := lahaina
 TARGET_TAP_TO_WAKE_NODE := "/sys/devices/virtual/touch/tp_dev/double_tap"
 
 # Properties
-TARGET_ODM_PROP += $(COMMON_PATH)/odm.prop
-TARGET_SYSTEM_PROP += $(COMMON_PATH)/system.prop
-TARGET_SYSTEM_EXT_PROP += $(COMMON_PATH)/system_ext.prop
-TARGET_VENDOR_PROP += $(COMMON_PATH)/vendor.prop
+TARGET_ODM_PROP += $(DEVICE_PATH)/odm.prop
+TARGET_SYSTEM_PROP += $(DEVICE_PATH)/system.prop
+TARGET_SYSTEM_EXT_PROP += $(DEVICE_PATH)/system_ext.prop
+TARGET_VENDOR_PROP += $(DEVICE_PATH)/vendor.prop
 
 # QCOM
 BOARD_USES_QCOM_HARDWARE := true
@@ -167,10 +188,11 @@ TARGET_FWK_SUPPORTS_FULL_VALUEADDS := true
 # Recovery
 BOARD_INCLUDE_DTB_IN_BOOTIMG := true
 BOARD_MOVE_RECOVERY_RESOURCES_TO_VENDOR_BOOT := true
-TARGET_RECOVERY_FSTAB := $(COMMON_PATH)/rootdir/etc/fstab.qcom
+TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/rootdir/etc/fstab.qcom
 TARGET_RECOVERY_PIXEL_FORMAT := "RGBX_8888"
 TARGET_USERIMAGES_USE_EXT4 := true
 TARGET_USERIMAGES_USE_F2FS := true
+TARGET_RECOVERY_UI_MARGIN_HEIGHT := 165
 
 # RIL
 ENABLE_VENDOR_RIL_SERVICE := true
@@ -181,9 +203,9 @@ VENDOR_SECURITY_PATCH := 2022-12-01
 # Sepolicy
 include device/qcom/sepolicy_vndr-legacy-um/SEPolicy.mk
 
-SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += $(COMMON_PATH)/sepolicy/private
-SYSTEM_EXT_PUBLIC_SEPOLICY_DIRS += $(COMMON_PATH)/sepolicy/public
-BOARD_SEPOLICY_DIRS += $(COMMON_PATH)/sepolicy/vendor
+SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy/private
+SYSTEM_EXT_PUBLIC_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy/public
+BOARD_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy/vendor
 
 # Soong
 SOONG_CONFIG_NAMESPACES += xiaomiSm8350Vars
@@ -230,5 +252,5 @@ WPA_SUPPLICANT_VERSION := VER_0_8_X
 CONFIG_ACS := true
 CONFIG_IEEE80211AX := true
 
-# Inherit proprietary blobs
-include vendor/xiaomi/sm8350-common/BoardConfigVendor.mk
+# Include proprietary files
+include vendor/xiaomi/mars/BoardConfigVendor.mk

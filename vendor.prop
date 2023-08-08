@@ -280,3 +280,9 @@ wifi.aware.interface=wifi-aware0
 
 # Zygote
 zygote.critical_window.minute=10
+
+# Bluetooth
+bluetooth.device.default_name=Mi 11 Pro
+
+# USB
+vendor.usb.product_string=Mi 11 Pro
