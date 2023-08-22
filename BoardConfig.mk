@@ -79,7 +79,7 @@ DEVICE_MANIFEST_FILE := \
 
 # Kernel
 TARGET_KERNEL_SOURCE := kernel/xiaomi/mars
-TARGET_KERNEL_CONFIG := vendor/lahaina-qgki_defconfig vendor/xiaomi_QGKI.config vendor/mars_QGKI.config
+TARGET_KERNEL_CONFIG := vendor/mars-qgki_defconfig
 
 BOARD_KERNEL_BASE := 0x00000000
 BOARD_KERNEL_IMAGE_NAME := Image
